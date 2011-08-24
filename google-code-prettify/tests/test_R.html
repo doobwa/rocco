@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link href="prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="prettify.js"></script>
+</head>
+
+<body onload="prettyPrint()" bgcolor="white">
+
+<h1>R</h1>
+<pre class="prettyprint" id="r">
+# Load in file
+f <- 'rocco.R'
+a <- readLines(f)
+
+x <- abs(3)
+
+# Map between docco styles and R special words.
+# If in multiple keyword list, the last list's style is used.
+wordstyles <- list()
+wordstyles[[1]] <- list(words=ls(env=.BaseNamespaceEnv)[-c(1:36)],style=".nf")
+
+# Split the file into sections
+sections <- list()
+emptylines <- which(a%in% c(""," ","  ","    "))
+start <- 1
+for (i in 1:length(emptylines)) {
+  end <- emptylines[i] - 1
+  sections[[i]] <- a[start:end]
+  start <- emptylines[i] + 1
+}
+
+</pre>
+
+</body>
+
+</html>

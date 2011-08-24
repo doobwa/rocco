@@ -1,0 +1,219 @@
+
+<html> 
+<head>
+  <title><%= title %></title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="./docco.css" />
+<link href="google-code-prettify/src/prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="google-code-prettify/src/prettify.js"></script>
+</head>
+<body onLoad="prettyPrint()">
+  <div id="container">
+    <div id="background"></div>
+    <table cellpadding=0 cellspace=0> <tr id="section-1">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div><h2>rocco</h2> A library for creating html documentation for R scripts to encourage literate programming.  The project essentially leverages the docco project <http://jashkenas.github.com/docco/> to be used for R scripts.  Code highlighting is performed by the google-code-prettify. </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-2">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div> To run rocco you will need to specify the path to: <ul><li> docco.css: https://github.com/jashkenas/docco/blob/master/resources/docco.css<li> google-code-pretty: download at http://code.google.com/p/google-code-prettify/ </ul> </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-3">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div> This is not meant as a replacement to a more full featured documentation system such a roxygen nor a literate programming solution like Sweave and noweb. </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-4">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div><h2>how to use rocco</h2> <ul><li> Sections: use an empty line in your code<li> Headers: begin line with double pound symbols<li> Comments: begin line with a single pound symbol<li> Lists: begin line with pound symbol then dash<li> Variables: denoted by left apostrophe [under construction] </ul> </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-5">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div> Note: Within a section, html is created for all headers, then all comments, then all list items. </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-6">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div> We run rocco on its own source code as an example in test.rocco.R. Example output can be found at test.rocco.html. </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;"> </div> </td> </tr><tr id="section-7">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div><h2>Beginning of rocco.R source code:</h2> Load in file </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+rocco <- function(input.file,output.file=paste(input.file,'.html',sep=''),
+                  path.to.prettify="google-code-prettify",
+                  path.to.docco=".",browse=FALSE) {
+  lines <- readLines(input.file) </div> </td> </tr><tr id="section-8">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div> Split the file into sections </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  sections <- list()
+  emptylines <- which(lines %in% c(""," ","  ","    "))
+  start <- 1
+  for (i in 1:length(emptylines)) {
+    end <- emptylines[i] - 1
+    sections[[i]] <- lines[start:end]
+    start <- emptylines[i] + 1
+  } </div> </td> </tr><tr id="section-9">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div> Create function for text lines and properties </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  processed <- list()
+  for (k in 1:length(sections)) {
+    section <- sections[[k]]#lapply(sections[1:8],function(section) { </div> </td> </tr><tr id="section-10">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div> Decide what each line is: header, comment or list item </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    linetypes <- sapply(section,function(s)
+                        switch(substr(s,1,2),"##"="header","# "="comment","#-"="list","code")
+                        )
+    names(linetypes) <- c() </div> </td> </tr><tr id="section-11">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div> Strip prefix depending on line type </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    content <- c()
+    for (i in 1:length(section)) {
+      content[i] <- switch(linetypes[i],
+                           "header" = substring(section[i],4),
+                           "comment" = substring(section[i],3),
+                           "list" = substring(section[i],3),
+                           "code" = section[i],
+                           section[i])
+    } </div> </td> </tr><tr id="section-12">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div> Combine adjacent comments (and code?) </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    combined <- list()
+    j <- 1
+    combined[[j]] <- list(content=content[1],type=linetypes[1])
+    if (length(section)>1) {
+      for (i in 2:length(section)) {
+        if (linetypes[i] == "comment" & linetypes[i-1] == "comment") {
+          combined[[j]]$content <- paste(combined[[j]]$content,content[i])
+        } else {
+          j <- j + 1
+          combined[[j]] <- list(content=content[i],type=linetypes[i])
+        }
+      }
+    }
+    processed[[k]] <- combined
+  } </div> </td> </tr><tr id="section-13">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div> Load html template snippets </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  data(html) </div> </td> </tr><tr id="section-14">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div> For each section </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  body <- ""
+  for (i in 1:length(processed)) {
+    section <- processed[[i]] </div> </td> </tr><tr id="section-15">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div> Print out all headers and comments </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    doc <- ''
+    for (j in 1:length(section)) {
+      if (section[[j]]$type=="header") {
+        doc <- paste(doc,html$h2.s,section[[j]]$content,html$h2.e,sep='')
+      }
+      if (section[[j]]$type=="comment") {
+        doc <- paste(doc,section[[j]]$content,collapse=html$p)
+      }
+    } </div> </td> </tr><tr id="section-16">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div> Collect all list items in section </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    if (any(sapply(section,function(x) (x$type=="list")))) {
+        doc <- paste(doc,html$ul.s)
+        for (j in 1:length(section)) {
+          if (section[[j]]$type=="list") {
+            doc <- paste(doc,html$li,section[[j]]$content,sep='')
+          }
+        }
+        doc <- paste(doc,html$ul.e)
+    } </div> </td> </tr><tr id="section-17">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div> Collect all code in section </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    code <- ''
+    code <- paste(code,html$pre.s)
+    for (j in 1:length(section)) {
+      if (section[[j]]$type=="code") {
+        code <- paste(code,section[[j]]$content,sep='\n')
+      }
+    }
+    code <- paste(code,html$pre.e) </div> </td> </tr><tr id="section-18">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div> Collect html code, documention, code into a section and append to body </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+    body <- paste(body,html$sec.1(i),doc,html$sec.2,code,html$sec.3,sep="")
+  } </div> </td> </tr><tr id="section-19">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div> Create a single string and write to a file </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  out <- paste(html$header(path.to.prettify,path.to.docco),
+               body,
+               html$footer)
+  write(out,file=output.file) </div> </td> </tr><tr id="section-20">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div> Optionally open a browser to view the produced html file </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint" style="border:0px;">
+  if (browse)
+    browseURL(paste("file://", getwd(),"/",output.file, sep = ""))
+} </div> </td> </tr> </table>
+  </div>
+</body>
+</html>
+

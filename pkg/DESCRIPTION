@@ -1,0 +1,10 @@
+Package: rocco
+Type: Package
+Title: Creates html documentation of R scripts for literate programming
+Version: 0.1
+Date: 2011-08-23
+Author: Chris DuBois
+Maintainer: Chris DuBois <chris.dubois@gmail.com>
+Description: Requires Google-code-prettify <http://code.google.com/p/google-code-prettify/> to do code highlighting.
+License: GPL, I guess?
+LazyLoad: yes
