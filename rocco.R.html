@@ -1,0 +1,338 @@
+
+<html>
+<head>
+  <title><%= title %></title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="docco.css" />
+<link href="prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="prettify.js"></script>
+</head>
+<body onLoad="prettyPrint()">
+  <div id="container">
+    <div id="background"></div>
+    <table cellpadding=0 cellspace=0> 
+         <tr id="section-1">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+            <h2>rocco</h2><p>A small script for literate programming in R.  Creates html pages using comments in R scripts.  Based on docco and related projects for other languages.  Not a replacement for full documentation systems, nor for full literate programming solutions like noweb.
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint"> </pre></div>
+            </td>
+          </tr>
+         <tr id="section-2">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+            <h2>API</h2>
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint"> </pre></div>
+            </td>
+          </tr>
+         <tr id="section-3">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+            <h2>Notes</h2><p>Only one set of each type allowed in a section.  
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint"> </pre></div>
+            </td>
+          </tr>
+         <tr id="section-4">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+            <p>Load in file
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+f <- 'rocco.R'
+a <- readLines(f) </pre></div>
+            </td>
+          </tr>
+         <tr id="section-5">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+            <p>Map between docco styles and R special words. If in multiple keyword list, the last list's style is used.
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+wordstyles <- list()
+wordstyles[[1]] <- list(words=ls(env=.BaseNamespaceEnv)[-c(1:36)],style=".nf") </pre></div>
+            </td>
+          </tr>
+         <tr id="section-6">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+            <p>Split the file into sections
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+sections <- list()
+emptylines <- which(a%in% c(""," ","  ","    "))
+start <- 1
+for (i in 1:length(emptylines)) {
+  end <- emptylines[i] - 1
+  sections[[i]] <- a[start:end]
+  start <- emptylines[i] + 1
+} </pre></div>
+            </td>
+          </tr>
+         <tr id="section-7">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+            <p>Create function for text lines and properties
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+processed <- list()
+for (k in 1:length(sections)) {
+  section <- sections[[k]]#lapply(sections[1:8],function(section) { </pre></div>
+            </td>
+          </tr>
+         <tr id="section-8">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+            <p>If there's a hash, trim whitespace
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint"> </pre></div>
+            </td>
+          </tr>
+         <tr id="section-9">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+            <p>Decide what each line is: header, comment or list item
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  linetypes <- sapply(section,function(s)
+    switch(substr(s,1,2),"##"="header","# "="comment","#-"="list","code")
+  )
+  names(linetypes) <- c() </pre></div>
+            </td>
+          </tr>
+         <tr id="section-10">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+            <p>Strip prefix depending on line type
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  content <- c()
+  for (i in 1:length(section)) {
+    content[i] <- switch(linetypes[i],
+                         "header" = substring(section[i],4),
+                         "comment" = substring(section[i],3),
+                         "list" = substring(section[i],3),
+                         "code" = section[i],
+                         section[i])
+  } </pre></div>
+            </td>
+          </tr>
+         <tr id="section-11">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+            <p>Combine adjacent comments (and code?)
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  combined <- list()
+  j <- 1
+  combined[[j]] <- list(content=content[1],type=linetypes[1])
+  if (length(section)>1) {
+    for (i in 2:length(section)) {
+      if (linetypes[i] == "comment" & linetypes[i-1] == "comment") {
+        combined[[j]]$content <- paste(combined[[j]]$content,content[i])
+      #} else if (linetypes[i] == "code" & linetypes[i-1] == "code") {
+        #combined[[j]]$content <- paste(combined[[j]]$content,content[i],sep="\n")
+      } else {
+        j <- j + 1
+        combined[[j]] <- list(content=content[i],type=linetypes[i])
+      }
+    }
+  }
+  processed[[k]] <- combined
+  #return(combined)
+} </pre></div>
+            </td>
+          </tr>
+         <tr id="section-12">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+            <p>HTML template code
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+header <- '
+<html>
+<head>
+  <title><%= title %></title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="docco.css" />
+<link href="prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="prettify.js"></script>
+</head>
+<body onLoad="prettyPrint()">
+  <div id="container">
+    <div id="background"></div>
+    <table cellpadding=0 cellspace=0>'
+footer <- '    </table>
+  </div>
+</body>
+</html>
+' </pre></div>
+            </td>
+          </tr>
+         <tr id="section-13">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+styleCode <- function(code,wordstyles) {
+  ws <- wordstyles
+  for (i in 1:length(ws)) {
+    for (word in ws[[i]]$words) {
+      stylized <- paste('<span class="',ws[[i]]$style,'">"',word,'"</span>"',sep="")
+      code <- gsub(word,stylized,code)
+    }
+  }
+  return(code)
+} </pre></div>
+            </td>
+          </tr>
+         <tr id="section-14">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+            <p>For each section
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+body <- ""
+for (i in 1:length(processed)) {
+  section <- processed[[i]] </pre></div>
+            </td>
+          </tr>
+         <tr id="section-15">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  # Print out all headers and comments
+  doc <- ''
+  for (j in 1:length(section)) {
+    if (section[[j]]$type=="header") {
+      doc <- paste(doc,'<h2>',section[[j]]$content,'</h2>',sep='')
+    }
+    if (section[[j]]$type=="comment") {
+      doc <- paste(doc,section[[j]]$content,sep='<p>')
+    }
+  } </pre></div>
+            </td>
+          </tr>
+         <tr id="section-16">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  # Print out all code
+  code <- ''
+  code <- paste(code,'<pre class="prettyprint">')
+  for (j in 1:length(section)) {
+    if (section[[j]]$type=="code") {
+      code <- paste(code,section[[j]]$content,sep='\n')
+    }
+  }
+  code <- paste(code,'</pre>') </pre></div>
+            </td>
+          </tr>
+         <tr id="section-17">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+  section <- processed[[i]]
+  body <- paste(body,'
+         <tr id="section-',i,'">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-',i,'">&#182;</a>
+              </div>
+            ',doc,'
+            </td>
+            <td class="code">
+              <div class="highlight">',code,'</div>
+            </td>
+          </tr>',sep="") </pre></div>
+            </td>
+          </tr>
+         <tr id="section-18">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+} </pre></div>
+            </td>
+          </tr>
+         <tr id="section-19">
+            <td class="docs">
+              <div class="pilwrap">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+            
+            </td>
+            <td class="code">
+              <div class="highlight"> <pre class="prettyprint">
+html <- paste(header,body,footer)
+write(html,file=paste(f,".html",sep="")) </pre></div>
+            </td>
+          </tr>     </table>
+  </div>
+</body>
+</html>
+
